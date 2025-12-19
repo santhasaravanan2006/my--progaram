@@ -68,8 +68,7 @@ class WatherApp(QWidget):
         QLabel#sun_Emoji{
         font-size:100px;
         }
-        QLabel#description{
-        font-size:50px;
+        
         }
         """)
         
