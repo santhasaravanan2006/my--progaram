@@ -90,39 +90,78 @@ class WatherApp(QWidget):
         except requests.exceptions.HTTPError as http_error:
             match response.status_code:
                 case 400:
-                    print("bad request\nplease check your input")
+                    self.display_error("bad request\nplease check your input")
                 case 401:
-                    print("unauthorized\nInvalid API key")
+                    self.display_error("unauthorized\nInvalid API key")
                 case 403:
-                    print("Forbidden\nAccess is denied")
+                    self.display_error("Forbidden\nAccess is denied")
                 case 404:
-                    print("not found\ncity not found")
+                    self.display_error("not found\ncity not found")
                 case 500:
-                    print("internal server error\nplease try again later")
+                    self.display_error("internal server error\nplease try again later")
                 case 502:
-                    print("Bad gatway\nInvalide response")
+                    self.display_error("Bad gatway\nInvalide response")
                 case 503:
-                    print("service unavailable\nserver is down")
+                    self.display_error("service unavailable\nserver is down")
                 case 504:
-                    print("Gatway timeout\nno response")
+                    self.display_error("Gatway timeout\nno response")
 
                 case _:
-                    print(f"HTTP ERROR\n{http_error}")
-                
-                
-                    
+                    self.display_error(f"HTTP ERROR\n{http_error}")
 
-            pass
-        except requests.exceptions.RequestException:
-            pass
-            
+        except requests.exceptions.ConnectionError:
+            self.display_error("Connection Error\n Check internet connection")
+
+        except requests.exceptions.Timeout:
+            self.display_error("Timeout Error:\nThe request time out")
+        except requests.exceptions.TooManyRedirects:
+            self.display_error("Too many Redirects\nchect the url")
+        except requests.exceptions.RequestException as req_error:
+            self.display_error(f"Request Erroe:\n{req_error}")
 
     def display_error(self,message):
-        pass
+        self.temperature.setStyleSheet("font-size:3opx;")
+        self.temperature.setText(message)
+        self.sun_Emoji.clear()
+        self.description.clear()
+
     def display_weather(self,data):
-        print(data)
+        self.temperature.setStyleSheet("font-size:75px;")
+        temp_k=data["main"]["temp"]
+        temp_c=temp_k-273.15
+        temp_f=(temp_k * 9/5) - 459.67
+        weather_description= data["weather"][0]["description"]
+        weather_id = data["weather"][0]["id"]
 
+        
+        self.temperature.setText(f"{temp_f:.0f}\u2109")
+        self.sun_Emoji.setText(self.get_weather_emoji(weather_id))
+        self.description.setText(weather_description)
 
+    @staticmethod
+    def get_weather_emoji(weather_id):
+        if 200<= weather_id <= 232:
+            return"\U0001F329"
+        elif 300 <= weather_id <= 321:
+            return"\U0001F326"
+        elif 500 <= weather_id <= 531:
+            return"\U0001F327"
+        elif 600 <= weather_id <= 622:
+            return"\u2744"
+        elif 701 <= weather_id <=741:
+            return"\U0001F32B"
+        elif weather_id==762:
+            return"🌋"
+        elif weather_id==771:
+            return"💨"
+        elif weather_id==781:
+            return"\U0001F329"
+        elif weather_id==800:
+            return"\u2600"
+        elif 801 <= weather_id <= 804:
+            return"\u2601"
+        else:
+            return""
 
 def main():
     app=QApplication(sys.argv)
